@@ -3,32 +3,6 @@ local SpellID = {
     KidneyShot = 8643,
 }
 
-local sessionTotal = 0
-local sessionResistCount = 0
-
--- TODO: Need to address other ranks that have different spell IDs
-local rogueSessionTotal = {
-    [SpellID.CheapShot] = 0,
-    [SpellID.KidneyShot] = 0
-}
-
-local rogueSessionResistCount = {
-    [SpellID.CheapShot] = 0,
-    [SpellID.KidneyShot] = 0
-}
-
-local rogueSessionResistCountFontStrings = {}
-
-local Event = {
-    COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED",
-    ADDON_LOADED = "ADDON_LOADED"
-}
-
-local CombatLogSubEvent = {
-    SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS",
-    SPELL_MISSED = "SPELL_MISSED",
-}
-
 local MissType = {
     ABSORB = "ABSORB",
     BLOCK = "BLOCK",
@@ -42,47 +16,103 @@ local MissType = {
     RESIST = "RESIST"
 }
 
+local Class = {
+    WARRIOR = "WARRIOR",
+    PALADIN = "PALADIN",
+    SHAMAN = "SHAMAN",
+    HUNTER = "HUNTER",
+    ROGUE = "ROGUE",
+    DRUID = "DRUID",
+    WARLOCK = "WARLOCK",
+    MAGE = "MAGE",
+    PRIEST = "PRIEST"
+}
+
+local sessionTotal = 0
+local sessionResistCount = 0
+
+-- TODO: Need to address other ranks that have different spell IDs
+local sessionClassSpellCounts = {
+    [Class.ROGUE] = {
+        [SpellID.CheapShot] = {
+            resistCount = 0,
+            totalCount = 0,
+        },
+        [SpellID.KidneyShot] = {
+            resistCount = 0,
+            totalCount = 0,
+        },
+    },
+}
+
+local GetSpellCounts = function()
+    local _, className = UnitClass("player")
+
+    return sessionClassSpellCounts[className]
+end
+
+local spellResistCountFontStrings = {}
+
+local Event = {
+    COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED",
+    ADDON_LOADED = "ADDON_LOADED"
+}
+
+local CombatLogSubEvent = {
+    SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS",
+    SPELL_MISSED = "SPELL_MISSED",
+}
+
 local HandleAddonLoaded = function(self)
-
     local prevFontString
-    for classResistSpellID, _ in pairs(rogueSessionResistCount) do
+
+    for classSpellID, _ in pairs(GetSpellCounts()) do
         -- Create ClassResist Layer
-        local classSessionResistSpellFontString = ResistTrackerFrame_ClassResists:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        local spellResistSpellFontString = ResistTrackerFrame_ClassResists:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 
-        local spellName = GetSpellInfo(classResistSpellID)
-
-        classSessionResistSpellFontString:SetPoint("TOPLEFT", prevFontString)
+        spellResistSpellFontString:SetPoint("TOPLEFT", prevFontString)
         if (prevFontString) then
-            classSessionResistSpellFontString:SetPoint("TOPLEFT", prevFontString, "BOTTOMLEFT")
+            spellResistSpellFontString:SetPoint("TOPLEFT", prevFontString, "BOTTOMLEFT")
         else
-            classSessionResistSpellFontString:SetPoint("TOPLEFT")
+            spellResistSpellFontString:SetPoint("TOPLEFT")
         end
 
-        prevFontString = classSessionResistSpellFontString
+        prevFontString = spellResistSpellFontString
 
-        rogueSessionResistCountFontStrings[classResistSpellID] = classSessionResistSpellFontString
+        spellResistCountFontStrings[classSpellID] = spellResistSpellFontString
     end
 end
 
-local HandleSpellCastSuccess = function(self, timestamp, subevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool)
+local HandleSpellCastSuccess = function(self, timestamp, subevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
-    local isRougeStun = rogueSessionTotal[spellId]
 
-    if (isMine and isRougeStun) then
-        sessionTotal = sessionTotal + 1
-        rogueSessionTotal[spellId] = rogueSessionTotal[spellId] + 1
+    local _, className = UnitClass("player")
+    local isTrackedClass = sessionClassSpellCounts[className]
+
+    print(isMine)
+    print(isTrackedClass)
+    if (isMine and isTrackedClass) then
+        isTrackedClassSpell = sessionClassSpellCounts[className][spellID]
+        if (isTrackedClassSpell) then
+            sessionTotal = sessionTotal + 1
+
+            print(sessionClassSpellCounts[className][spellID].totalCount)
+            sessionClassSpellCounts[className][spellID].totalCount = sessionClassSpellCounts[className][spellID].totalCount + 1
+            print(sessionClassSpellCounts[className][spellID].totalCount)
+        end
     end
 end
 
-local HandleSpellMissed = function(self, timestamp, subevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool, missType, isOffHand, amountMissed, critical)
+local HandleSpellMissed = function(self, timestamp, subevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, missType, isOffHand, amountMissed, critical)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
     if (isMine and missType == MissType.RESIST) then
-        c = rogueSessionResistCount[spellId]
-        if (c) then
+        spellCounts = GetSpellCounts()[spellID]
+        if (spellCounts) then
             sessionResistCount = sessionResistCount + 1
-            rogueSessionResistCount[spellId] = c + 1
 
+            local _, className = UnitClass("player")
+            sessionClassSpellCounts[className][spellID].resistCount = sessionClassSpellCounts[className][spellID].resistCount + 1
         end
     end
 end
@@ -104,20 +134,27 @@ ResistTrackerFrame:SetScript("OnEvent", function(self, event, arg1, ...)
 end)
 
 ResistTrackerFrame:SetScript("OnUpdate", function(self, ...)
-    local localizedClass = UnitClass("player")
-    ResistTrackerFrame_Header_ClassNameText:SetText(localizedClass)
+    local _, classEnum = UnitClass("player")
+    ResistTrackerFrame_Header_ClassNameText:SetText(classEnum)
 
-    ResistTrackerFrame_Body_SessionTotalFontString:SetText(string.format("Session Total: %d", sessionTotal))
-    ResistTrackerFrame_Body_SessionResistCountFontString:SetText(string.format("Session Resist: %d (%.f%%)", sessionResistCount, sessionResistCount == 0 and 100 or (sessionResistCount * 100 / sessionTotal)))
+    ResistTrackerFrame_Body_SessionTotalFontString:SetText(string.format("Total: %d", sessionTotal))
 
-    for spellID, fontString in pairs(rogueSessionResistCountFontStrings) do
+    local sessionResistCountPercent = 0
+    if sessionResistCount ~= 0 then
+        sessionResistCountPercent = sessionResistCount * 100 / sessionTotal
+    end
+    ResistTrackerFrame_Body_SessionResistCountFontString:SetText(string.format("Resist: %d (%.f%%)", sessionResistCount, sessionResistCountPercent))
+
+    for spellID, fontString in pairs(spellResistCountFontStrings) do
         local spellName = GetSpellInfo(spellID)
-        local spellResistCount = rogueSessionResistCount[spellID]
-        local spellTotalCount = rogueSessionTotal[spellID]
+        local spellResistCount = GetSpellCounts()[spellID].resistCount
+        local spellTotalCount = GetSpellCounts()[spellID].totalCount
 
-        if (spellResistCount) then
-            fontString:SetText(string.format("%s Resist: %d (%.f%%)", spellName, spellResistCount, spellResistCount == 0 and 100 or (spellResistCount * 100 / spellTotalCount)))
+        local spellResistPercent = 0
+        if spellResistCount ~= 0 then
+            spellResistPercent = spellResistCount * 100 / spellTotalCount
         end
+        fontString:SetText(string.format("%s Resist: %d (%.f%%)", spellName, spellResistCount, spellResistPercent))
     end
 end)
 
