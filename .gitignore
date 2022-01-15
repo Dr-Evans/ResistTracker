@@ -60,4 +60,9 @@ CVS
 *.mode1v3
 *.mode2v3
 *.perspectivev3
-xcuserdata/
+xcuserdata//luarocks
+
+# Lua #
+/lua
+/lua_modules
+/.luarocks
