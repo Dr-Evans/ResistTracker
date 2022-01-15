@@ -1,4 +1,6 @@
 local SpellID = {
+    EntanglingRoots = 26989,
+    Cyclone = 33786,
     CheapShot = 1833,
     KidneyShot = 8643,
 }
@@ -47,7 +49,16 @@ local trackedSpellCounts = {
             totalCount = 0,
         },
     },
-    [Class.DRUID] = {},
+    [Class.DRUID] = {
+        [SpellID.EntanglingRoots] = {
+            resistCount = 0,
+            totalCount = 0,
+        },
+        [SpellID.Cyclone] = {
+            resistCount = 0,
+            totalCount = 0,
+        }
+    },
     [Class.WARLOCK] = {},
     [Class.MAGE] = {},
     [Class.PRIEST] = {}
