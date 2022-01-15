@@ -29,7 +29,7 @@
 
                 <Layers>
                     <Layer>
-                        <FontString name="$parent_ClassNameText" inherits="Tooltip_Med" text="ClassName">
+                        <FontString name="$parent_ClassNameText" inherits="Tooltip_Med">
                             <Anchors>
                                 <Anchor point="TOP"
                                         relativePoint="TOP"/>
@@ -54,9 +54,8 @@
                 </Anchors>
                 <Layers>
                     <Layer>
-                        <FontString name="$parent_SessionCountText"
-                                    inherits="Tooltip_Med"
-                                    text="Session Total: ">
+                        <FontString name="$parent_SessionTotalFontString"
+                                    inherits="Tooltip_Med">
                             <Anchors>
                                 <Anchor point="TOPLEFT"
                                         relativeTo="$parent"
@@ -64,31 +63,12 @@
                             </Anchors>
                         </FontString>
 
-                        <FontString name="$parent_SessionCount"
+                        <FontString name="$parent_SessionResistCountFontString"
                                     inherits="Tooltip_Med">
-                            <Anchors>
-                                <Anchor point="LEFT"
-                                        relativeTo="$parent_SessionCountText"
-                                        relativePoint="RIGHT"/>
-                            </Anchors>
-                        </FontString>
-
-                        <FontString name="$parent_SessionResistCountText"
-                                    inherits="Tooltip_Med"
-                                    text="Session Resist Total: ">
                             <Anchors>
                                 <Anchor point="TOPLEFT"
-                                        relativeTo="$parent_SessionCountText"
+                                        relativeTo="$parent_SessionTotalFontString"
                                         relativePoint="BOTTOMLEFT"/>
-                            </Anchors>
-                        </FontString>
-
-                        <FontString name="$parent_SessionResistCount"
-                                    inherits="Tooltip_Med">
-                            <Anchors>
-                                <Anchor point="LEFT"
-                                        relativeTo="$parent_SessionResistCountText"
-                                        relativePoint="RIGHT"/>
                             </Anchors>
                         </FontString>
                     </Layer>
