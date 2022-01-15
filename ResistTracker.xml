@@ -17,7 +17,7 @@
         </Anchors>
 
         <Frames>
-            <Frame name="$parent_Header">
+            <Frame name="$parent_HeaderFrame">
                 <Size>
                     <AbsDimension y="14"/>
                 </Size>
@@ -29,7 +29,7 @@
 
                 <Layers>
                     <Layer>
-                        <FontString name="$parent_ClassNameText" inherits="Tooltip_Med">
+                        <FontString name="$parent_ClassNameFontString" inherits="Tooltip_Med">
                             <Anchors>
                                 <Anchor point="TOP"
                                         relativePoint="TOP"/>
@@ -39,17 +39,17 @@
                 </Layers>
             </Frame>
 
-            <Frame name="$parent_Body">
+            <Frame name="$parent_BodyFrame">
                 <Size>
                     <AbsDimension y="40"/>
                 </Size>
 
                 <Anchors>
                     <Anchor point="TOPLEFT"
-                            relativeTo="$parent_Header"
+                            relativeTo="$parent_HeaderFrame"
                             relativePoint="BOTTOMLEFT"/>
                     <Anchor point="TOPRIGHT"
-                            relativeTo="$parent_Header"
+                            relativeTo="$parent_HeaderFrame"
                             relativePoint="BOTTOMRIGHT"/>
                 </Anchors>
                 <Layers>
@@ -75,17 +75,17 @@
                 </Layers>
             </Frame>
 
-            <Frame name="$parent_ClassResists">
+            <Frame name="$parent_ClassResistsFrame">
                 <Size>
                     <AbsDimension y="40"/>
                 </Size>
 
                 <Anchors>
                     <Anchor point="TOPLEFT"
-                            relativeTo="$parent_Body"
+                            relativeTo="$parent_BodyFrame"
                             relativePoint="BOTTOMLEFT"/>
                     <Anchor point="TOPRIGHT"
-                            relativeTo="$parent_Body"
+                            relativeTo="$parent_BodyFrame"
                             relativePoint="BOTTOMRIGHT"/>
                 </Anchors>
             </Frame>
