@@ -32,7 +32,11 @@ local sessionAttemptCount = 0
 local sessionResistCount = 0
 
 -- TODO: Need to address other ranks that have different spell IDs
-local sessionClassSpellCounts = {
+local trackedSpellCounts = {
+    [Class.WARRIOR] = {},
+    [Class.PALADIN] = {},
+    [Class.SHAMAN] = {},
+    [Class.HUNTER] = {},
     [Class.ROGUE] = {
         [SpellID.CheapShot] = {
             resistCount = 0,
@@ -43,12 +47,69 @@ local sessionClassSpellCounts = {
             totalCount = 0,
         },
     },
+    [Class.DRUID] = {},
+    [Class.WARLOCK] = {},
+    [Class.MAGE] = {},
+    [Class.PRIEST] = {}
 }
 
-local GetSpellCounts = function()
+local GetTrackedSpellIDs = function()
     local _, className = UnitClass("player")
 
-    return sessionClassSpellCounts[className]
+    local trackedSpellIDs = {}
+    local i = 1
+    for trackedSpellID, _ in pairs(trackedSpellCounts[className]) do
+        trackedSpellIDs[i] = trackedSpellID
+
+        i = i + 1
+    end
+
+    return trackedSpellIDs
+end
+
+local GetTrackedSpellResistCount = function(spellID)
+    local _, className = UnitClass("player")
+
+    local classSpellCounts = trackedSpellCounts[className][spellID]
+
+    if (classSpellCounts) then
+        return classSpellCounts.resistCount
+    end
+end
+
+local GetTrackedSpellTotalCount = function(spellID)
+    local _, className = UnitClass("player")
+
+    local classSpellCounts = trackedSpellCounts[className][spellID]
+
+    if (classSpellCounts) then
+        return classSpellCounts.totalCount
+    end
+end
+
+local SetTrackedSpellResistCount = function(spellID, resistCount)
+    local _, className = UnitClass("player")
+
+    local spellCounts = trackedSpellCounts[className][spellID]
+
+    print(trackedSpellCounts)
+    print(className)
+    print(spellID)
+    print(spellCounts)
+
+    if (spellCounts) then
+        spellCounts.resistCount = resistCount
+    end
+end
+
+local SetTrackedSpellTotalCount = function(spellID, totalCount)
+    local _, className = UnitClass("player")
+
+    local spellCounts = trackedSpellCounts[className][spellID]
+
+    if (spellCounts) then
+        spellCounts.totalCount = totalCount
+    end
 end
 
 local spellResistCountFontStrings = {}
@@ -66,7 +127,7 @@ local CombatLogSubEvent = {
 local HandleAddonLoaded = function(self)
     local prevFontString
 
-    for classSpellID, _ in pairs(GetSpellCounts()) do
+    for _, classSpellID in pairs(GetTrackedSpellIDs()) do
         -- Create ClassResist Layer
         local spellResistSpellFontString = ResistTrackerFrame_ClassResists:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 
@@ -86,19 +147,12 @@ end
 local HandleSpellCastSuccess = function(self, timestamp, subevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
-    local _, className = UnitClass("player")
-    local isTrackedClass = sessionClassSpellCounts[className]
-
-    print(isMine)
-    print(isTrackedClass)
-    if (isMine and isTrackedClass) then
-        isTrackedClassSpell = sessionClassSpellCounts[className][spellID]
-        if (isTrackedClassSpell) then
+    if (isMine) then
+        currentTotalCount = GetTrackedSpellTotalCount(spellID)
+        if (currentTotalCount) then
             sessionAttemptCount = sessionAttemptCount + 1
 
-            print(sessionClassSpellCounts[className][spellID].totalCount)
-            sessionClassSpellCounts[className][spellID].totalCount = sessionClassSpellCounts[className][spellID].totalCount + 1
-            print(sessionClassSpellCounts[className][spellID].totalCount)
+            SetTrackedSpellTotalCount(spellID, currentTotalCount + 1)
         end
     end
 end
@@ -107,12 +161,11 @@ local HandleSpellMissed = function(self, timestamp, subevent, hideCaster, source
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
     if (isMine and missType == MissType.RESIST) then
-        spellCounts = GetSpellCounts()[spellID]
-        if (spellCounts) then
+        currentResistCount = GetTrackedSpellResistCount(spellID)
+        if (currentResistCount) then
             sessionResistCount = sessionResistCount + 1
 
-            local _, className = UnitClass("player")
-            sessionClassSpellCounts[className][spellID].resistCount = sessionClassSpellCounts[className][spellID].resistCount + 1
+            SetTrackedSpellResistCount(spellID, currentResistCount + 1)
         end
     end
 end
@@ -147,8 +200,8 @@ ResistTrackerFrame:SetScript("OnUpdate", function(self, ...)
 
     for spellID, fontString in pairs(spellResistCountFontStrings) do
         local spellName = GetSpellInfo(spellID)
-        local spellResistCount = GetSpellCounts()[spellID].resistCount
-        local spellTotalCount = GetSpellCounts()[spellID].totalCount
+        local spellResistCount = GetTrackedSpellResistCount(spellID)
+        local spellTotalCount = GetTrackedSpellTotalCount(spellID)
 
         local spellResistPercent = 0
         if spellResistCount ~= 0 then
