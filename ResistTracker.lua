@@ -1,5 +1,5 @@
 -- Need to address other ranks
-local RogueStun = {
+local SpellID = {
     CheapShot = 1833,
     KidneyShot = 8643,
 }
@@ -7,17 +7,20 @@ local RogueStun = {
 ResistTrackerFrame.sessionCount = 0
 ResistTrackerFrame.sessionResistCount = 0
 ResistTrackerFrame.rogueSessionResistCount = {
-    [RogueStun.CheapShot] = 0,
-    [RogueStun.KidneyShot] = 0
+    [SpellID.CheapShot] = 0,
+    [SpellID.KidneyShot] = 0
 }
 
+ResistTrackerFrame.rogueSessionResistCountFontStrings = {}
+
 local Event = {
-    COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED"
+    COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED",
+    ADDON_LOADED = "ADDON_LOADED"
 }
 
 local CombatLogSubEvent = {
     SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS",
-    SPELL_MISSED = "SPELL_MISSED"
+    SPELL_MISSED = "SPELL_MISSED",
 }
 
 local MissType = {
@@ -32,6 +35,34 @@ local MissType = {
     REFLECT = "REFLECT",
     RESIST = "RESIST"
 }
+
+local HandleAddonLoaded = function(self)
+
+    local prevFontString
+    for classResistSpellID, count in pairs(self.rogueSessionResistCount) do
+        print(classResistSpellID)
+        -- Create ClassResist Layer
+        local spellNameFontString = ResistTrackerFrame_ClassResists:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        local countFontString = ResistTrackerFrame_ClassResists:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+
+        local spellName = GetSpellInfo(classResistSpellID)
+        spellNameFontString:SetText(spellName .. " Resist: ")
+        countFontString:SetText(count) -- this is a little moot as it will always be 0
+
+        spellNameFontString:SetPoint("TOPLEFT", prevFontString)
+        if (prevFontString) then
+            spellNameFontString:SetPoint("TOPLEFT", prevFontString, "BOTTOMLEFT")
+        else
+            spellNameFontString:SetPoint("TOPLEFT")
+        end
+
+        countFontString:SetPoint("LEFT", spellNameFontString, "RIGHT")
+
+        prevFontString = spellNameFontString
+
+        self.rogueSessionResistCountFontStrings[classResistSpellID] = countFontString
+    end
+end
 
 local PrintResists = function(self)
     print("Session Count: " .. self.sessionCount)
@@ -72,9 +103,12 @@ local HandleSpellMissed = function(self, timestamp, subevent, hideCaster, source
     end
 end
 
+ResistTrackerFrame:RegisterEvent(Event.ADDON_LOADED)
 ResistTrackerFrame:RegisterEvent(Event.COMBAT_LOG_EVENT_UNFILTERED)
-ResistTrackerFrame:SetScript("OnEvent", function(self, event, ...)
-    if (event == Event.COMBAT_LOG_EVENT_UNFILTERED) then
+ResistTrackerFrame:SetScript("OnEvent", function(self, event, arg1, ...)
+    if (event == Event.ADDON_LOADED and arg1 == "ResistTracker") then
+        HandleAddonLoaded(self)
+    elseif (event == Event.COMBAT_LOG_EVENT_UNFILTERED) then
         local _, subevent = CombatLogGetCurrentEventInfo()
 
         if (subevent == CombatLogSubEvent.SPELL_CAST_SUCCESS) then
@@ -85,22 +119,23 @@ ResistTrackerFrame:SetScript("OnEvent", function(self, event, ...)
     end
 end)
 
+ResistTrackerFrame:SetScript("OnLoad", function(self, ...)
+    print("loaded")
+end)
+
 ResistTrackerFrame:SetScript("OnUpdate", function(self, ...)
     local localizedClass = UnitClass("player")
-    ResistTrackerFrame_ClassName:SetText(localizedClass)
+    ResistTrackerFrame_Header_ClassNameText:SetText(localizedClass)
 
-    ResistTrackerFrame_SessionCount:SetText(self.sessionCount)
-    ResistTrackerFrame_SessionResistCount:SetText(self.sessionResistCount)
-    --
-    --for classResistSpellID, count in pairs(ResistTrackerFrame.rogueSessionResistCount) do
-    --    -- Create ClassResist Layer
-    --    local fontString = ResistTrackerFrame_ClassResists:CreateFontString()
-    --
-    --    local spellName = GetSpellInfo(classResistSpellID)
-    --
-    --    fontString:SetFontObject("GameTooltipTextSmall")
-    --    fontString:SetText(spellName .. " Resist : " .. count)
-    --end
+    ResistTrackerFrame_Body_SessionCount:SetText(self.sessionCount)
+    ResistTrackerFrame_Body_SessionResistCount:SetText(self.sessionResistCount)
+
+    for spellID, fontString in pairs(self.rogueSessionResistCountFontStrings) do
+        local resistCount = self.rogueSessionResistCount[spellID]
+        if (resistCount) then
+            fontString:SetText(self.rogueSessionResistCount[spellID])
+        end
+    end
 end)
 
 ResistTrackerFrame:SetScript("OnMouseDown", function(self, ...)

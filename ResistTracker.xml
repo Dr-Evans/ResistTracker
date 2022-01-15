@@ -8,7 +8,7 @@
            movable="true">
 
         <Size>
-            <AbsDimension x="150" y="40"/>
+            <AbsDimension x="150" y="100"/>
         </Size>
         <Anchors>
             <Anchor point="TOPLEFT">
@@ -16,58 +16,99 @@
             </Anchor>
         </Anchors>
 
-        <Layers>
-            <Layer>
-                <FontString name="$parent_ClassName" inherits="Tooltip_Med" text="ClassName">
-                    <Anchors>
-                        <Anchor point="TOP"
-                                relativePoint="TOP"/>
-                    </Anchors>
-                </FontString>
-            </Layer>
+        <Frames>
+            <Frame name="$parent_Header">
+                <Size>
+                    <AbsDimension y="14"/>
+                </Size>
 
-            <Layer>
                 <Anchors>
-                    <Anchor point="TOPLEFT"
-                            relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
                 </Anchors>
 
-                <FontString name="$parent_SessionCountText"
-                            inherits="Tooltip_Med"
-                            text="Session Total: ">
-                </FontString>
+                <Layers>
+                    <Layer>
+                        <FontString name="$parent_ClassNameText" inherits="Tooltip_Med" text="ClassName">
+                            <Anchors>
+                                <Anchor point="TOP"
+                                        relativePoint="TOP"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>
 
-                <FontString name="$parent_SessionCount"
-                            inherits="Tooltip_Med">
-                    <Anchors>
-                        <Anchor point="LEFT"
-                                relativeTo="$parent_SessionCountText"
-                                relativePoint="RIGHT"/>
-                    </Anchors>
-                </FontString>
+            <Frame name="$parent_Body">
+                <Size>
+                    <AbsDimension y="40"/>
+                </Size>
 
-                <FontString name="$parent_SessionResistCountText"
-                            inherits="Tooltip_Med"
-                            text="Session Resist Total: ">
-                    <Anchors>
-                        <Anchor point="TOPLEFT"
-                                relativeTo="$parent_SessionCountText"
-                                relativePoint="BOTTOMLEFT"/>
-                    </Anchors>
-                </FontString>
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="$parent_Header"
+                            relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT"
+                            relativeTo="$parent_Header"
+                            relativePoint="BOTTOMRIGHT"/>
+                </Anchors>
+                <Layers>
+                    <Layer>
+                        <FontString name="$parent_SessionCountText"
+                                    inherits="Tooltip_Med"
+                                    text="Session Total: ">
+                            <Anchors>
+                                <Anchor point="TOPLEFT"
+                                        relativeTo="$parent"
+                                        relativePoint="TOPLEFT"/>
+                            </Anchors>
+                        </FontString>
 
-                <FontString name="$parent_SessionResistCount"
-                            inherits="Tooltip_Med">
-                    <Anchors>
-                        <Anchor point="LEFT"
-                                relativeTo="$parent_SessionResistCountText"
-                                relativePoint="RIGHT"/>
-                    </Anchors>
-                </FontString>
-            </Layer>
-        </Layers>
-        <Frames>
+                        <FontString name="$parent_SessionCount"
+                                    inherits="Tooltip_Med">
+                            <Anchors>
+                                <Anchor point="LEFT"
+                                        relativeTo="$parent_SessionCountText"
+                                        relativePoint="RIGHT"/>
+                            </Anchors>
+                        </FontString>
 
+                        <FontString name="$parent_SessionResistCountText"
+                                    inherits="Tooltip_Med"
+                                    text="Session Resist Total: ">
+                            <Anchors>
+                                <Anchor point="TOPLEFT"
+                                        relativeTo="$parent_SessionCountText"
+                                        relativePoint="BOTTOMLEFT"/>
+                            </Anchors>
+                        </FontString>
+
+                        <FontString name="$parent_SessionResistCount"
+                                    inherits="Tooltip_Med">
+                            <Anchors>
+                                <Anchor point="LEFT"
+                                        relativeTo="$parent_SessionResistCountText"
+                                        relativePoint="RIGHT"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>
+
+            <Frame name="$parent_ClassResists">
+                <Size>
+                    <AbsDimension y="40"/>
+                </Size>
+
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="$parent_Body"
+                            relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT"
+                            relativeTo="$parent_Body"
+                            relativePoint="BOTTOMRIGHT"/>
+                </Anchors>
+            </Frame>
         </Frames>
     </Frame>
 </Ui>
