@@ -28,7 +28,7 @@ local Class = {
     PRIEST = "PRIEST"
 }
 
-local sessionTotal = 0
+local sessionAttemptCount = 0
 local sessionResistCount = 0
 
 -- TODO: Need to address other ranks that have different spell IDs
@@ -94,7 +94,7 @@ local HandleSpellCastSuccess = function(self, timestamp, subevent, hideCaster, s
     if (isMine and isTrackedClass) then
         isTrackedClassSpell = sessionClassSpellCounts[className][spellID]
         if (isTrackedClassSpell) then
-            sessionTotal = sessionTotal + 1
+            sessionAttemptCount = sessionAttemptCount + 1
 
             print(sessionClassSpellCounts[className][spellID].totalCount)
             sessionClassSpellCounts[className][spellID].totalCount = sessionClassSpellCounts[className][spellID].totalCount + 1
@@ -137,13 +137,13 @@ ResistTrackerFrame:SetScript("OnUpdate", function(self, ...)
     local _, classEnum = UnitClass("player")
     ResistTrackerFrame_Header_ClassNameText:SetText(classEnum)
 
-    ResistTrackerFrame_Body_SessionTotalFontString:SetText(string.format("Total: %d", sessionTotal))
+    ResistTrackerFrame_Body_SessionTotalFontString:SetText(string.format("Stun Attempts: %d", sessionAttemptCount))
 
     local sessionResistCountPercent = 0
     if sessionResistCount ~= 0 then
-        sessionResistCountPercent = sessionResistCount * 100 / sessionTotal
+        sessionResistCountPercent = sessionResistCount * 100 / sessionAttemptCount
     end
-    ResistTrackerFrame_Body_SessionResistCountFontString:SetText(string.format("Resist: %d (%.f%%)", sessionResistCount, sessionResistCountPercent))
+    ResistTrackerFrame_Body_SessionResistCountFontString:SetText(string.format("Stun Resists: %d (%.f%%)", sessionResistCount, sessionResistCountPercent))
 
     for spellID, fontString in pairs(spellResistCountFontStrings) do
         local spellName = GetSpellInfo(spellID)
@@ -154,7 +154,7 @@ ResistTrackerFrame:SetScript("OnUpdate", function(self, ...)
         if spellResistCount ~= 0 then
             spellResistPercent = spellResistCount * 100 / spellTotalCount
         end
-        fontString:SetText(string.format("%s Resist: %d (%.f%%)", spellName, spellResistCount, spellResistPercent))
+        fontString:SetText(string.format("%s Resists: %d (%.f%%)", spellName, spellResistCount, spellResistPercent))
     end
 end)
 
