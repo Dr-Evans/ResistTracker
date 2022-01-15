@@ -190,7 +190,7 @@ end)
 
 ResistTrackerFrame:SetScript("OnUpdate", function(self, ...)
     local _, classEnum = UnitClass("player")
-    ResistTrackerFrame.header.classNameText:SetText(classEnum)
+    ResistTrackerFrame_Header_ClassNameText:SetText(classEnum)
 
     ResistTrackerFrame_Body_SessionTotalFontString:SetText(string.format(
                                                                "Stun Attempts: %d",
