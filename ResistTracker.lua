@@ -1,4 +1,3 @@
--- Need to address other ranks
 local SpellID = {
     CheapShot = 1833,
     KidneyShot = 8643,
@@ -6,6 +5,8 @@ local SpellID = {
 
 ResistTrackerFrame.sessionCount = 0
 ResistTrackerFrame.sessionResistCount = 0
+
+-- TODO: Need to address other ranks that have different spell IDs
 ResistTrackerFrame.rogueSessionResistCount = {
     [SpellID.CheapShot] = 0,
     [SpellID.KidneyShot] = 0
