@@ -1,0 +1,73 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\..\FrameXML\UI.xsd">
+
+    <Frame name="ResistTrackerFrame"
+           parent="UIParent"
+           enableMouse="true"
+           movable="true">
+
+        <Size>
+            <AbsDimension x="150" y="40"/>
+        </Size>
+        <Anchors>
+            <Anchor point="TOPLEFT">
+                <Offset x="20" y="-90"/>
+            </Anchor>
+        </Anchors>
+
+        <Layers>
+            <Layer>
+                <FontString name="$parent_ClassName" inherits="Tooltip_Med" text="ClassName">
+                    <Anchors>
+                        <Anchor point="TOP"
+                                relativePoint="TOP"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+
+            <Layer>
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativePoint="BOTTOMLEFT"/>
+                </Anchors>
+
+                <FontString name="$parent_SessionCountText"
+                            inherits="Tooltip_Med"
+                            text="Session Total: ">
+                </FontString>
+
+                <FontString name="$parent_SessionCount"
+                            inherits="Tooltip_Med">
+                    <Anchors>
+                        <Anchor point="LEFT"
+                                relativeTo="$parent_SessionCountText"
+                                relativePoint="RIGHT"/>
+                    </Anchors>
+                </FontString>
+
+                <FontString name="$parent_SessionResistCountText"
+                            inherits="Tooltip_Med"
+                            text="Session Resist Total: ">
+                    <Anchors>
+                        <Anchor point="TOPLEFT"
+                                relativeTo="$parent_SessionCountText"
+                                relativePoint="BOTTOMLEFT"/>
+                    </Anchors>
+                </FontString>
+
+                <FontString name="$parent_SessionResistCount"
+                            inherits="Tooltip_Med">
+                    <Anchors>
+                        <Anchor point="LEFT"
+                                relativeTo="$parent_SessionResistCountText"
+                                relativePoint="RIGHT"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+
+        </Frames>
+    </Frame>
+</Ui>

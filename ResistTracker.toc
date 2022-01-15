@@ -1,0 +1,7 @@
+## Interface: 80250
+## Title: Resist Tracker
+## Notes: Tracks resists
+## Version: 0.1
+
+ResistTracker.xml
+ResistTracker.lua
