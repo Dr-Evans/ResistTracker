@@ -2,7 +2,7 @@ local SpellID = {
     EntanglingRoots = 26989,
     Cyclone = 33786,
     CheapShot = 1833,
-    KidneyShot = 8643,
+    KidneyShot = 8643
 }
 
 local MissType = {
@@ -30,8 +30,19 @@ local Class = {
     PRIEST = "PRIEST"
 }
 
+local Event = {
+    COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED",
+    ADDON_LOADED = "ADDON_LOADED"
+}
+
+local CombatLogSubEvent = {
+    SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS",
+    SPELL_MISSED = "SPELL_MISSED"
+}
+
 local sessionAttemptCount = 0
 local sessionResistCount = 0
+local spellResistCountFontStrings = {}
 
 -- TODO: Need to address other ranks that have different spell IDs
 local trackedSpellCounts = {
@@ -40,24 +51,12 @@ local trackedSpellCounts = {
     [Class.SHAMAN] = {},
     [Class.HUNTER] = {},
     [Class.ROGUE] = {
-        [SpellID.CheapShot] = {
-            resistCount = 0,
-            totalCount = 0,
-        },
-        [SpellID.KidneyShot] = {
-            resistCount = 0,
-            totalCount = 0,
-        },
+        [SpellID.CheapShot] = {resistCount = 0, totalCount = 0},
+        [SpellID.KidneyShot] = {resistCount = 0, totalCount = 0}
     },
     [Class.DRUID] = {
-        [SpellID.EntanglingRoots] = {
-            resistCount = 0,
-            totalCount = 0,
-        },
-        [SpellID.Cyclone] = {
-            resistCount = 0,
-            totalCount = 0,
-        }
+        [SpellID.EntanglingRoots] = {resistCount = 0, totalCount = 0},
+        [SpellID.Cyclone] = {resistCount = 0, totalCount = 0}
     },
     [Class.WARLOCK] = {},
     [Class.MAGE] = {},
@@ -83,9 +82,7 @@ local GetTrackedSpellResistCount = function(spellID)
 
     local classSpellCounts = trackedSpellCounts[className][spellID]
 
-    if (classSpellCounts) then
-        return classSpellCounts.resistCount
-    end
+    if (classSpellCounts) then return classSpellCounts.resistCount end
 end
 
 local GetTrackedSpellTotalCount = function(spellID)
@@ -93,9 +90,7 @@ local GetTrackedSpellTotalCount = function(spellID)
 
     local classSpellCounts = trackedSpellCounts[className][spellID]
 
-    if (classSpellCounts) then
-        return classSpellCounts.totalCount
-    end
+    if (classSpellCounts) then return classSpellCounts.totalCount end
 end
 
 local SetTrackedSpellResistCount = function(spellID, resistCount)
@@ -108,9 +103,7 @@ local SetTrackedSpellResistCount = function(spellID, resistCount)
     print(spellID)
     print(spellCounts)
 
-    if (spellCounts) then
-        spellCounts.resistCount = resistCount
-    end
+    if (spellCounts) then spellCounts.resistCount = resistCount end
 end
 
 local SetTrackedSpellTotalCount = function(spellID, totalCount)
@@ -118,33 +111,22 @@ local SetTrackedSpellTotalCount = function(spellID, totalCount)
 
     local spellCounts = trackedSpellCounts[className][spellID]
 
-    if (spellCounts) then
-        spellCounts.totalCount = totalCount
-    end
+    if (spellCounts) then spellCounts.totalCount = totalCount end
 end
-
-local spellResistCountFontStrings = {}
-
-local Event = {
-    COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED",
-    ADDON_LOADED = "ADDON_LOADED"
-}
-
-local CombatLogSubEvent = {
-    SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS",
-    SPELL_MISSED = "SPELL_MISSED",
-}
 
 local HandleAddonLoaded = function(self)
     local prevFontString
 
     for _, classSpellID in pairs(GetTrackedSpellIDs()) do
         -- Create ClassResist Layer
-        local spellResistSpellFontString = ResistTrackerFrame_ClassResists:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        local spellResistSpellFontString =
+            ResistTrackerFrame_ClassResists:CreateFontString(nil, "OVERLAY",
+                                                             "GameFontHighlight")
 
         spellResistSpellFontString:SetPoint("TOPLEFT", prevFontString)
         if (prevFontString) then
-            spellResistSpellFontString:SetPoint("TOPLEFT", prevFontString, "BOTTOMLEFT")
+            spellResistSpellFontString:SetPoint("TOPLEFT", prevFontString,
+                                                "BOTTOMLEFT")
         else
             spellResistSpellFontString:SetPoint("TOPLEFT")
         end
@@ -155,11 +137,15 @@ local HandleAddonLoaded = function(self)
     end
 end
 
-local HandleSpellCastSuccess = function(self, timestamp, subevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool)
+local HandleSpellCastSuccess = function(self, timestamp, subevent, hideCaster,
+                                        sourceGUID, sourceName, sourceFlags,
+                                        sourceRaidFlags, destGUID, destName,
+                                        destFlags, destRaidFlags, spellID,
+                                        spellName, spellSchool)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
     if (isMine) then
-        currentTotalCount = GetTrackedSpellTotalCount(spellID)
+        local currentTotalCount = GetTrackedSpellTotalCount(spellID)
         if (currentTotalCount) then
             sessionAttemptCount = sessionAttemptCount + 1
 
@@ -168,7 +154,12 @@ local HandleSpellCastSuccess = function(self, timestamp, subevent, hideCaster, s
     end
 end
 
-local HandleSpellMissed = function(self, timestamp, subevent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, missType, isOffHand, amountMissed, critical)
+local HandleSpellMissed = function(self, timestamp, subevent, hideCaster,
+                                   sourceGUID, sourceName, sourceFlags,
+                                   sourceRaidFlags, destGUID, destName,
+                                   destFlags, destRaidFlags, spellID, spellName,
+                                   spellSchool, missType, isOffHand,
+                                   amountMissed, critical)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
     if (isMine and missType == MissType.RESIST) then
@@ -199,15 +190,21 @@ end)
 
 ResistTrackerFrame:SetScript("OnUpdate", function(self, ...)
     local _, classEnum = UnitClass("player")
-    ResistTrackerFrame_Header_ClassNameText:SetText(classEnum)
+    ResistTrackerFrame.header.classNameText:SetText(classEnum)
 
-    ResistTrackerFrame_Body_SessionTotalFontString:SetText(string.format("Stun Attempts: %d", sessionAttemptCount))
+    ResistTrackerFrame_Body_SessionTotalFontString:SetText(string.format(
+                                                               "Stun Attempts: %d",
+                                                               sessionAttemptCount))
 
     local sessionResistCountPercent = 0
     if sessionResistCount ~= 0 then
-        sessionResistCountPercent = sessionResistCount * 100 / sessionAttemptCount
+        sessionResistCountPercent = sessionResistCount * 100 /
+                                        sessionAttemptCount
     end
-    ResistTrackerFrame_Body_SessionResistCountFontString:SetText(string.format("Stun Resists: %d (%.f%%)", sessionResistCount, sessionResistCountPercent))
+    ResistTrackerFrame_Body_SessionResistCountFontString:SetText(string.format(
+                                                                     "Stun Resists: %d (%.f%%)",
+                                                                     sessionResistCount,
+                                                                     sessionResistCountPercent))
 
     for spellID, fontString in pairs(spellResistCountFontStrings) do
         local spellName = GetSpellInfo(spellID)
@@ -218,15 +215,13 @@ ResistTrackerFrame:SetScript("OnUpdate", function(self, ...)
         if spellResistCount ~= 0 then
             spellResistPercent = spellResistCount * 100 / spellTotalCount
         end
-        fontString:SetText(string.format("%s Resists: %d (%.f%%)", spellName, spellResistCount, spellResistPercent))
+        fontString:SetText(string.format("%s Resists: %d (%.f%%)", spellName,
+                                         spellResistCount, spellResistPercent))
     end
 end)
 
-ResistTrackerFrame:SetScript("OnMouseDown", function(self, ...)
-    self:StartMoving()
-end)
-ResistTrackerFrame:SetScript("OnMouseUp", function(self, ...)
-    self:StopMovingOrSizing()
-end)
-
+ResistTrackerFrame:SetScript("OnMouseDown",
+                             function(self, ...) self:StartMoving() end)
+ResistTrackerFrame:SetScript("OnMouseUp",
+                             function(self, ...) self:StopMovingOrSizing() end)
 
