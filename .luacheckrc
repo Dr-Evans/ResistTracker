@@ -5,6 +5,7 @@ ignore = {
 }
 
 read_globals = {
+    -- Lua
 	string = {fields = {'join', 'split', 'trim', 'format'}},
 	bit = {fields = {'band'}},
 
@@ -15,7 +16,7 @@ read_globals = {
     'ResistTrackerFrame_ClassResistsFrame',
     'ResistTrackerFrame_HeaderFrame_ClassNameFontString',
 
-	-- WOW
+	-- WoW
     'COMBATLOG_OBJECT_AFFILIATION_MINE',
 
     'CombatLogGetCurrentEventInfo',
