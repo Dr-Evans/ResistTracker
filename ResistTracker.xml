@@ -6,51 +6,48 @@
            parent="UIParent"
            enableMouse="true"
            movable="true">
-
         <Size>
-            <AbsDimension x="150" y="100"/>
+            <AbsDimension x="150"
+                          y="100" />
         </Size>
         <Anchors>
             <Anchor point="TOPLEFT">
-                <Offset x="20" y="-90"/>
+                <Offset x="20"
+                        y="-90" />
             </Anchor>
         </Anchors>
-
         <Frames>
             <Frame name="$parent_HeaderFrame">
                 <Size>
-                    <AbsDimension y="14"/>
+                    <AbsDimension y="14" />
                 </Size>
-
                 <Anchors>
-                    <Anchor point="TOPLEFT"/>
-                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
                 </Anchors>
-
                 <Layers>
                     <Layer>
-                        <FontString name="$parent_ClassNameFontString" inherits="Tooltip_Med">
+                        <FontString name="$parent_ClassNameFontString"
+                                    inherits="Tooltip_Med">
                             <Anchors>
                                 <Anchor point="TOP"
-                                        relativePoint="TOP"/>
+                                        relativePoint="TOP" />
                             </Anchors>
                         </FontString>
                     </Layer>
                 </Layers>
             </Frame>
-
             <Frame name="$parent_BodyFrame">
                 <Size>
-                    <AbsDimension y="40"/>
+                    <AbsDimension y="40" />
                 </Size>
-
                 <Anchors>
                     <Anchor point="TOPLEFT"
                             relativeTo="$parent_HeaderFrame"
-                            relativePoint="BOTTOMLEFT"/>
+                            relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT"
                             relativeTo="$parent_HeaderFrame"
-                            relativePoint="BOTTOMRIGHT"/>
+                            relativePoint="BOTTOMRIGHT" />
                 </Anchors>
                 <Layers>
                     <Layer>
@@ -59,34 +56,31 @@
                             <Anchors>
                                 <Anchor point="TOPLEFT"
                                         relativeTo="$parent"
-                                        relativePoint="TOPLEFT"/>
+                                        relativePoint="TOPLEFT" />
                             </Anchors>
                         </FontString>
-
                         <FontString name="$parent_SessionResistCountFontString"
                                     inherits="Tooltip_Med">
                             <Anchors>
                                 <Anchor point="TOPLEFT"
                                         relativeTo="$parent_SessionTotalFontString"
-                                        relativePoint="BOTTOMLEFT"/>
+                                        relativePoint="BOTTOMLEFT" />
                             </Anchors>
                         </FontString>
                     </Layer>
                 </Layers>
             </Frame>
-
             <Frame name="$parent_ClassResistsFrame">
                 <Size>
-                    <AbsDimension y="40"/>
+                    <AbsDimension y="40" />
                 </Size>
-
                 <Anchors>
                     <Anchor point="TOPLEFT"
                             relativeTo="$parent_BodyFrame"
-                            relativePoint="BOTTOMLEFT"/>
+                            relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT"
                             relativeTo="$parent_BodyFrame"
-                            relativePoint="BOTTOMRIGHT"/>
+                            relativePoint="BOTTOMRIGHT" />
                 </Anchors>
             </Frame>
         </Frames>
