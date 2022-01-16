@@ -3,5 +3,4 @@
 ## Notes: Tracks resists
 ## Version: 0.1
 
-ResistTracker.xml
-ResistTracker.lua
+main.xml

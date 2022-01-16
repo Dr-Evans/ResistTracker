@@ -1,11 +1,12 @@
 install:
-	# TODO: Added lua-format and luacheck
+	# TODO: Add lua-format and luacheck
 	sudo apt install tidy
 
+# TODO: Do recursive
 fmt:
-	lua-format *.lua -i
-	tidy -config .tidyconfig -m *.xml
+	lua-format -i src/*.lua
+	tidy -config .tidyconfig -m src/*.xml
 
 lint:
-	luacheck *.lua
-	tidy -config .tidyconfig -e *.xml
+	luacheck src/*.lua
+	tidy -config .tidyconfig -e src/*.xml

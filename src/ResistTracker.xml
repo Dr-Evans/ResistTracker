@@ -85,4 +85,5 @@
             </Frame>
         </Frames>
     </Frame>
+    <Script file="ResistTracker.lua" />
 </Ui>
