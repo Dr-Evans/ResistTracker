@@ -4,7 +4,7 @@ install:
 
 # TODO: Do recursive
 fmt:
-	lua-format -i src/*.lua
+	lua-format -c .luaformatconfig -i src/*.lua
 	tidy -config .tidyconfig -m src/*.xml
 
 lint:
