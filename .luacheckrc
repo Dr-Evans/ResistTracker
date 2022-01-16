@@ -9,7 +9,10 @@ read_globals = {
 	string = {fields = {'join', 'split', 'trim', 'format'}},
 	bit = {fields = {'band'}},
 
-	-- FrameXML
+    -- Libs
+    'LibStub',
+
+    -- FrameXML
 	'ResistTrackerFrame',
 	'ResistTrackerFrame_BodyFrame_SessionTotalFontString',
 	'ResistTrackerFrame_BodyFrame_SessionResistCountFontString',
