@@ -30,10 +30,7 @@ local Class = {
     PRIEST = "PRIEST"
 }
 
-local Event = {
-    COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED",
-    ADDON_LOADED = "ADDON_LOADED"
-}
+local Event = {COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED"}
 
 local CombatLogSubEvent = {
     SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS",
@@ -98,11 +95,6 @@ local SetTrackedSpellResistCount = function(spellID, resistCount)
 
     local spellCounts = trackedSpellCounts[className][spellID]
 
-    print(trackedSpellCounts)
-    print(className)
-    print(spellID)
-    print(spellCounts)
-
     if (spellCounts) then spellCounts.resistCount = resistCount end
 end
 
@@ -114,7 +106,31 @@ local SetTrackedSpellTotalCount = function(spellID, totalCount)
     if (spellCounts) then spellCounts.totalCount = totalCount end
 end
 
-local HandleAddonLoaded = function(self)
+-- Ace 3.0
+ResistTracker = LibStub("AceAddon-3.0"):NewAddon("ResistTracker",
+                                                 "AceConsole-3.0",
+                                                 "AceEvent-3.0")
+
+local options = {
+    name = "ResistTracker",
+    handler = ResistTracker,
+    type = "group",
+    args = {
+        msg = {
+            type = "toggle",
+            name = "Show class name",
+            desc = "Whether to show the class name",
+            get = "GetClassNameEnabled",
+            set = "SetClassNameEnabled"
+        }
+    }
+}
+
+function ResistTracker:OnInitialize()
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("ResistTracker", options)
+    self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(
+                            "ResistTracker", "ResistTracker")
+
     local prevFontString
 
     for _, classSpellID in pairs(GetTrackedSpellIDs()) do
@@ -138,11 +154,30 @@ local HandleAddonLoaded = function(self)
     end
 end
 
-local HandleSpellCastSuccess = function(self, timestamp, subevent, hideCaster,
-                                        sourceGUID, sourceName, sourceFlags,
-                                        sourceRaidFlags, destGUID, destName,
-                                        destFlags, destRaidFlags, spellID,
-                                        spellName, spellSchool)
+function ResistTracker:OnEnable()
+    self:RegisterEvent(Event.COMBAT_LOG_EVENT_UNFILTERED, function()
+        local _, subevent = CombatLogGetCurrentEventInfo()
+
+        if (subevent == CombatLogSubEvent.SPELL_CAST_SUCCESS) then
+            self:HandleSpellCastSuccess(CombatLogGetCurrentEventInfo())
+        elseif (subevent == CombatLogSubEvent.SPELL_MISSED) then
+            self:HandleSpellMissed(CombatLogGetCurrentEventInfo())
+        end
+    end)
+end
+
+function ResistTracker:GetClassNameEnabled() return self.classNameEnabled end
+
+function ResistTracker:SetClassNameEnabled(_, value)
+    self.classNameEnabled = value
+end
+
+function ResistTracker:HandleSpellCastSuccess(timestamp, subevent, hideCaster,
+                                              sourceGUID, sourceName,
+                                              sourceFlags, sourceRaidFlags,
+                                              destGUID, destName, destFlags,
+                                              destRaidFlags, spellID, spellName,
+                                              spellSchool)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
     if (isMine) then
@@ -155,12 +190,12 @@ local HandleSpellCastSuccess = function(self, timestamp, subevent, hideCaster,
     end
 end
 
-local HandleSpellMissed = function(self, timestamp, subevent, hideCaster,
-                                   sourceGUID, sourceName, sourceFlags,
-                                   sourceRaidFlags, destGUID, destName,
-                                   destFlags, destRaidFlags, spellID, spellName,
-                                   spellSchool, missType, isOffHand,
-                                   amountMissed, critical)
+function ResistTracker:HandleSpellMissed(timestamp, subevent, hideCaster,
+                                         sourceGUID, sourceName, sourceFlags,
+                                         sourceRaidFlags, destGUID, destName,
+                                         destFlags, destRaidFlags, spellID,
+                                         spellName, spellSchool, missType,
+                                         isOffHand, amountMissed, critical)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
     if (isMine and missType == MissType.RESIST) then
@@ -172,22 +207,6 @@ local HandleSpellMissed = function(self, timestamp, subevent, hideCaster,
         end
     end
 end
-
-ResistTrackerFrame:RegisterEvent(Event.ADDON_LOADED)
-ResistTrackerFrame:RegisterEvent(Event.COMBAT_LOG_EVENT_UNFILTERED)
-ResistTrackerFrame:SetScript("OnEvent", function(self, event, arg1)
-    if (event == Event.ADDON_LOADED and arg1 == "ResistTracker") then
-        HandleAddonLoaded(self)
-    elseif (event == Event.COMBAT_LOG_EVENT_UNFILTERED) then
-        local _, subevent = CombatLogGetCurrentEventInfo()
-
-        if (subevent == CombatLogSubEvent.SPELL_CAST_SUCCESS) then
-            HandleSpellCastSuccess(self, CombatLogGetCurrentEventInfo())
-        elseif (subevent == CombatLogSubEvent.SPELL_MISSED) then
-            HandleSpellMissed(self, CombatLogGetCurrentEventInfo())
-        end
-    end
-end)
 
 ResistTrackerFrame:SetScript("OnUpdate", function(self)
     local _, classEnum = UnitClass("player")
@@ -224,4 +243,3 @@ ResistTrackerFrame:SetScript("OnMouseDown",
                              function(self) self:StartMoving() end)
 ResistTrackerFrame:SetScript("OnMouseUp",
                              function(self) self:StopMovingOrSizing() end)
-
