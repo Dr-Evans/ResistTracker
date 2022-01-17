@@ -102,6 +102,9 @@ local ResistTrackerAddon = LibStub("AceAddon-3.0"):NewAddon("ResistTracker", "Ac
                                                             "AceEvent-3.0")
 
 function ResistTrackerAddon:OnInitialize()
+    self:RegisterChatCommand("rt", "SlashCommand")
+    self:RegisterChatCommand("resisttracker", "SlashCommand")
+
     local prevFontString
 
     for _, classSpellID in pairs(GetTrackedSpellIDs()) do
@@ -124,6 +127,18 @@ end
 
 function ResistTrackerAddon:OnEnable()
     self:RegisterEvent(Event.COMBAT_LOG_EVENT_UNFILTERED, "HandleCombatLogEventUnfiltered")
+end
+
+function ResistTrackerAddon:SlashCommand(msg)
+    if msg == "reset" then
+        sessionAttemptCount = 0
+        sessionResistCount = 0
+
+        for _, classSpellID in pairs(GetTrackedSpellIDs()) do
+            SetTrackedSpellTotalCount(classSpellID, 0)
+            SetTrackedSpellResistCount(classSpellID, 0)
+        end
+    end
 end
 
 function ResistTrackerAddon:HandleCombatLogEventUnfiltered()
