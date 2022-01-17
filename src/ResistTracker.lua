@@ -107,27 +107,43 @@ local options = {
     handler = ResistTrackerAddon,
     type = "group",
     args = {
-        resistSoundEffectID = {
-            type = "select",
-            name = "Sound Effect",
-            desc = "Sound to play",
-            values = {
-                ["416"] = "Murloc",
-                ["6943"] = "Orc Laugh",
-                ["1294"] = "Peasant",
-                ["11466"] = "Prepared"
-            },
-            get = "GetResistSoundEffectID",
-            set = "SetResistSoundEffectID"
-        },
+        soundHeading = {type = "header", name = "Sounds", order = 0},
         shouldPlayResistSoundEffect = {
             type = "toggle",
             name = "Sound on Resist",
             desc = "Play a sound when a resist happens.",
+            order = 1,
             get = "GetShouldPlayResistSoundEffect",
             set = "SetShouldPlayResistSoundEffect"
         },
-        testSoundButton = {type = "execute", name = "Test Sound", func = "OnTestSoundButtonClick"}
+        resistSoundEffectID = {
+            type = "select",
+            name = "Sound Effect",
+            desc = "Sound to play",
+            order = 2,
+            values = {
+                -- TODO: Replace IDs with actual files
+                ["416"] = "Murloc",
+                ["6943"] = "Orc Laugh",
+                ["1294"] = "Peasant",
+                ["11466"] = "Prepared",
+                ["Interface\\AddOns\\ResistTracker\\media\\sounds\\SadTrombone.mp3"] = "Sad Trombone",
+                ["Interface\\AddOns\\ResistTracker\\media\\sounds\\LosingHorn.mp3"] = "Losing Horn",
+                ["Interface\\AddOns\\ResistTracker\\media\\sounds\\Bruh.mp3"] = "Bruh",
+                ["Interface\\AddOns\\ResistTracker\\media\\sounds\\MetalGearAlert.mp3"] = "Metal Gear Alert",
+                ["Interface\\AddOns\\ResistTracker\\media\\sounds\\Sheesh.mp3"] = "Sheesh",
+                ["Interface\\AddOns\\ResistTracker\\media\\sounds\\WilhelmScream.mp3"] = "Wilhelm Scream"
+            },
+            get = "GetResistSoundEffect",
+            set = "SetResistSoundEffect"
+        },
+        testSoundButton = {
+            type = "execute",
+            name = "Test",
+            desc = "Test sound effect.",
+            order = 3,
+            func = "OnTestSoundButtonClick"
+        }
     }
 }
 
@@ -139,7 +155,7 @@ function ResistTrackerAddon:OnInitialize()
     self:RegisterChatCommand("resisttracker", "SlashCommand")
 
     self.shouldPlayResistSoundEffect = true
-    self.resistSoundEffectID = "416"
+    self.resistSoundEffect = "416"
 
     local prevFontString
 
@@ -186,14 +202,19 @@ function ResistTrackerAddon:GetShouldPlayResistSoundEffect(info)
 end
 
 function ResistTrackerAddon:SetShouldPlayResistSoundEffect(info, value)
+    options.args.resistSoundEffectID.disabled = not value
+    options.args.testSoundButton.disabled = not value
+
     self.shouldPlayResistSoundEffect = value
 end
 
-function ResistTrackerAddon:GetResistSoundEffectID(info) return self.resistSoundEffectID end
+function ResistTrackerAddon:GetResistSoundEffect(info) return self.resistSoundEffect end
 
-function ResistTrackerAddon:SetResistSoundEffectID(info, value) self.resistSoundEffectID = value end
+function ResistTrackerAddon:SetResistSoundEffect(info, value) self.resistSoundEffect = value end
 
-function ResistTrackerAddon:OnTestSoundButtonClick() PlaySound(self.resistSoundEffectID) end
+function ResistTrackerAddon:OnTestSoundButtonClick()
+    if not pcall(PlaySound, self.resistSoundEffect) then PlaySoundFile(self.resistSoundEffect) end
+end
 
 function ResistTrackerAddon:HandleCombatLogEventUnfiltered()
     local _, subevent = CombatLogGetCurrentEventInfo()
@@ -235,7 +256,7 @@ function ResistTrackerAddon:HandleSpellMissed(timestamp, subevent, hideCaster, s
 
             SetTrackedSpellResistCount(spellID, currentResistCount + 1)
 
-            if self.shouldPlayResistSoundEffect then PlaySound(self.resistSoundEffectID) end
+            if self.shouldPlayResistSoundEffect then PlaySound(self.resistSoundEffect) end
         end
     end
 end

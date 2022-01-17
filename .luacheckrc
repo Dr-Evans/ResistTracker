@@ -24,5 +24,8 @@ read_globals = {
 
     'CombatLogGetCurrentEventInfo',
 	'GetSpellInfo',
+    'InterfaceOptionsFrame_OpenToCategory',
+    'PlaySound',
+    'PlaySoundFile',
 	'UnitClass',
 }
