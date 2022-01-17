@@ -29,6 +29,8 @@ local Event = {COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED"}
 
 local CombatLogSubEvent = {SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS", SPELL_MISSED = "SPELL_MISSED"}
 
+local SlashCommandMessage = {RESET = "reset"}
+
 local sessionAttemptCount = 0
 local sessionResistCount = 0
 local spellResistCountFontStrings = {}
@@ -100,10 +102,44 @@ end
 
 local ResistTrackerAddon = LibStub("AceAddon-3.0"):NewAddon("ResistTracker", "AceConsole-3.0",
                                                             "AceEvent-3.0")
+local options = {
+    name = "ResistTracker",
+    handler = ResistTrackerAddon,
+    type = "group",
+    args = {
+        resistSoundEffectID = {
+            type = "select",
+            name = "Sound Effect",
+            desc = "Sound to play",
+            values = {
+                ["416"] = "Murloc",
+                ["6943"] = "Orc Laugh",
+                ["1294"] = "Peasant",
+                ["11466"] = "Prepared"
+            },
+            get = "GetResistSoundEffectID",
+            set = "SetResistSoundEffectID"
+        },
+        shouldPlayResistSoundEffect = {
+            type = "toggle",
+            name = "Sound on Resist",
+            desc = "Play a sound when a resist happens.",
+            get = "GetShouldPlayResistSoundEffect",
+            set = "SetShouldPlayResistSoundEffect"
+        },
+        testSoundButton = {type = "execute", name = "Test Sound", func = "OnTestSoundButtonClick"}
+    }
+}
 
 function ResistTrackerAddon:OnInitialize()
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("ResistTracker", options)
+    self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("ResistTracker")
+
     self:RegisterChatCommand("rt", "SlashCommand")
     self:RegisterChatCommand("resisttracker", "SlashCommand")
+
+    self.shouldPlayResistSoundEffect = true
+    self.resistSoundEffectID = "416"
 
     local prevFontString
 
@@ -130,7 +166,11 @@ function ResistTrackerAddon:OnEnable()
 end
 
 function ResistTrackerAddon:SlashCommand(msg)
-    if msg == "reset" then
+    if not msg or msg:trim() == "" then
+        -- https://github.com/Stanzilla/WoWUIBugs/issues/89
+        InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+        InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+    elseif msg == SlashCommandMessage.RESET then
         sessionAttemptCount = 0
         sessionResistCount = 0
 
@@ -140,6 +180,20 @@ function ResistTrackerAddon:SlashCommand(msg)
         end
     end
 end
+
+function ResistTrackerAddon:GetShouldPlayResistSoundEffect(info)
+    return self.shouldPlayResistSoundEffect
+end
+
+function ResistTrackerAddon:SetShouldPlayResistSoundEffect(info, value)
+    self.shouldPlayResistSoundEffect = value
+end
+
+function ResistTrackerAddon:GetResistSoundEffectID(info) return self.resistSoundEffectID end
+
+function ResistTrackerAddon:SetResistSoundEffectID(info, value) self.resistSoundEffectID = value end
+
+function ResistTrackerAddon:OnTestSoundButtonClick() PlaySound(self.resistSoundEffectID) end
 
 function ResistTrackerAddon:HandleCombatLogEventUnfiltered()
     local _, subevent = CombatLogGetCurrentEventInfo()
@@ -180,6 +234,8 @@ function ResistTrackerAddon:HandleSpellMissed(timestamp, subevent, hideCaster, s
             sessionResistCount = sessionResistCount + 1
 
             SetTrackedSpellResistCount(spellID, currentResistCount + 1)
+
+            if self.shouldPlayResistSoundEffect then PlaySound(self.resistSoundEffectID) end
         end
     end
 end
