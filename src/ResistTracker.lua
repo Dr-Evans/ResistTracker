@@ -103,24 +103,31 @@ end
 local ResistTrackerAddon = LibStub("AceAddon-3.0"):NewAddon("ResistTracker", "AceConsole-3.0",
                                                             "AceEvent-3.0")
 local options = {
-    name = "ResistTracker",
-    handler = ResistTrackerAddon,
     type = "group",
+    name = "Resist Tracker",
+    handler = ResistTrackerAddon,
     args = {
-        soundHeading = {type = "header", name = "Sounds", order = 0},
+        soundDesc = {
+            type = "description",
+            name = "These options affect sounds that play on resists.",
+            order = 1
+        },
+        newLine0 = {type = "description", name = "", order = 2},
         shouldPlayResistSoundEffect = {
             type = "toggle",
             name = "Sound on Resist",
             desc = "Play a sound when a resist happens.",
-            order = 1,
+            order = 3,
             get = "GetShouldPlayResistSoundEffect",
             set = "SetShouldPlayResistSoundEffect"
         },
+        newLine1 = {type = "description", name = "", order = 4},
         resistSoundEffectID = {
             type = "select",
             name = "Sound Effect",
             desc = "Sound to play",
-            order = 2,
+            order = 5,
+            width = 0.8,
             values = {
                 -- TODO: Replace IDs with actual files
                 ["416"] = "Murloc",
@@ -141,7 +148,8 @@ local options = {
             type = "execute",
             name = "Test",
             desc = "Test sound effect.",
-            order = 3,
+            order = 6,
+            width = "half",
             func = "OnTestSoundButtonClick"
         }
     }
