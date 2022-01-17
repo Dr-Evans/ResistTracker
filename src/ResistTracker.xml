@@ -11,10 +11,8 @@
                           y="100" />
         </Size>
         <Anchors>
-            <Anchor point="TOPLEFT">
-                <Offset x="20"
-                        y="-90" />
-            </Anchor>
+            <Anchor point="TOPLEFT" />
+            <Anchor point="BOTTOMRIGHT" />
         </Anchors>
         <Frames>
             <Frame name="$parent_HeaderFrame">
