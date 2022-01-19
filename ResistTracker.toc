@@ -1,6 +1,6 @@
-## Interface: 80250
+## Interface-BCC: 20503
 ## Title: Resist Tracker
-## Notes: Tracks resists
-## Version: 0.1
+## Notes: A simple resist tracker.
+## Version: 0.2.0-alpha
 
 main.xml
