@@ -35,7 +35,8 @@ local SlashCommandMessage = {
     CENTER = "center",
     SHOW = "show",
     HIDE = "hide",
-    HELP = "help"
+    HELP = "help",
+    PLAY = "play"
 }
 
 local sessionAttemptCount = 0
@@ -209,6 +210,8 @@ function ResistTrackerAddon:SlashCommand(msg)
         self:HandleShowSlashCommand()
     elseif string.lower(msg) == SlashCommandMessage.HIDE then
         self:HandleHideSlashCommand()
+    elseif string.lower(msg) == SlashCommandMessage.PLAY then
+        self:HandlePlaySlashCommand()
     end
 end
 
@@ -236,6 +239,7 @@ function ResistTrackerAddon:HandleHelpSlashCommand()
 /rt center - Reset UI to center of screen.
 /rt help - Print this message.
 /rt hide - Hide UI.
+/rt play - Play current resist sound.
 /rt reset - Reset resist counts.
 /rt show - Show UI.]])
 end
@@ -244,6 +248,9 @@ function ResistTrackerAddon:HandleShowSlashCommand() ResistTrackerFrame:Show() e
 
 function ResistTrackerAddon:HandleHideSlashCommand() ResistTrackerFrame:Hide() end
 
+function ResistTrackerAddon:HandlePlaySlashCommand()
+    if not pcall(PlaySound, self.resistSoundEffect) then PlaySoundFile(self.resistSoundEffect) end
+end
 function ResistTrackerAddon:GetShouldPlayResistSoundEffect(info)
     return self.shouldPlayResistSoundEffect
 end
