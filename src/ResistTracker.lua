@@ -236,12 +236,12 @@ end
 function ResistTrackerAddon:HandleHelpSlashCommand()
     print([[Resist Tracker
 /rt - Open config menu.
-/rt center - Reset UI to center of screen.
+/rt center - Reset Resist Tracker to center of screen.
 /rt help - Print this message.
-/rt hide - Hide UI.
+/rt hide - Hide Resist Tracker.
 /rt play - Play current resist sound.
 /rt reset - Reset resist counts.
-/rt show - Show UI.]])
+/rt show - Show Resist Tracker.]])
 end
 
 function ResistTrackerAddon:HandleShowSlashCommand() ResistTrackerFrame:Show() end
