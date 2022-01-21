@@ -32,7 +32,6 @@ local CombatLogSubEvent = {SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS", SPELL_MISS
 local SlashCommandMessage = {
     RESET = "reset",
     CONFIG = "config",
-    CENTER = "center",
     SHOW = "show",
     HIDE = "hide",
     HELP = "help",
@@ -200,8 +199,6 @@ end
 function ResistTrackerAddon:SlashCommand(msg)
     if not msg or msg:trim() == "" or string.lower(msg) == SlashCommandMessage.CONFIG then
         self:HandleConfigSlashCommand()
-    elseif string.lower(msg) == SlashCommandMessage.CENTER then
-        self:HandleCenterSlashCommand()
     elseif string.lower(msg) == SlashCommandMessage.RESET then
         self:HandleResetSlashCommand()
     elseif string.lower(msg) == SlashCommandMessage.HELP then
@@ -221,8 +218,6 @@ function ResistTrackerAddon:HandleConfigSlashCommand()
     InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
 end
 
-function ResistTrackerAddon:HandleCenterSlashCommand() print("TODO: Implement me!") end
-
 function ResistTrackerAddon:HandleResetSlashCommand()
     sessionAttemptCount = 0
     sessionResistCount = 0
@@ -236,7 +231,6 @@ end
 function ResistTrackerAddon:HandleHelpSlashCommand()
     print([[Resist Tracker
 /rt - Open config menu.
-/rt center - Reset Resist Tracker to center of screen.
 /rt help - Print this message.
 /rt hide - Hide Resist Tracker.
 /rt play - Play current resist sound.
