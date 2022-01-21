@@ -29,7 +29,14 @@ local Event = {COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED"}
 
 local CombatLogSubEvent = {SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS", SPELL_MISSED = "SPELL_MISSED"}
 
-local SlashCommandMessage = {RESET = "reset"}
+local SlashCommandMessage = {
+    RESET = "reset",
+    CONFIG = "config",
+    CENTER = "center",
+    SHOW = "show",
+    HIDE = "hide",
+    HELP = "help"
+}
 
 local sessionAttemptCount = 0
 local sessionResistCount = 0
@@ -190,20 +197,50 @@ function ResistTrackerAddon:OnEnable()
 end
 
 function ResistTrackerAddon:SlashCommand(msg)
-    if not msg or msg:trim() == "" then
-        -- https://github.com/Stanzilla/WoWUIBugs/issues/89
-        InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
-        InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
-    elseif msg == SlashCommandMessage.RESET then
-        sessionAttemptCount = 0
-        sessionResistCount = 0
-
-        for _, classSpellID in pairs(GetTrackedSpellIDs()) do
-            SetTrackedSpellTotalCount(classSpellID, 0)
-            SetTrackedSpellResistCount(classSpellID, 0)
-        end
+    if not msg or msg:trim() == "" or string.lower(msg) == SlashCommandMessage.CONFIG then
+        self:HandleConfigSlashCommand()
+    elseif string.lower(msg) == SlashCommandMessage.CENTER then
+        self:HandleCenterSlashCommand()
+    elseif string.lower(msg) == SlashCommandMessage.RESET then
+        self:HandleResetSlashCommand()
+    elseif string.lower(msg) == SlashCommandMessage.HELP then
+        self:HandleHelpSlashCommand()
+    elseif string.lower(msg) == SlashCommandMessage.SHOW then
+        self:HandleShowSlashCommand()
+    elseif string.lower(msg) == SlashCommandMessage.HIDE then
+        self:HandleHideSlashCommand()
     end
 end
+
+function ResistTrackerAddon:HandleConfigSlashCommand()
+    -- https://github.com/Stanzilla/WoWUIBugs/issues/89
+    InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+    InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+end
+
+function ResistTrackerAddon:HandleCenterSlashCommand() print("TODO: Implement me!") end
+
+function ResistTrackerAddon:HandleResetSlashCommand()
+    sessionAttemptCount = 0
+    sessionResistCount = 0
+
+    for _, classSpellID in pairs(GetTrackedSpellIDs()) do
+        SetTrackedSpellTotalCount(classSpellID, 0)
+        SetTrackedSpellResistCount(classSpellID, 0)
+    end
+end
+
+function ResistTrackerAddon:HandleHelpSlashCommand()
+    print([[Resist Tracker\n
+    /rt - Open config menu.\n
+    /rt center - Reset UI to center of screen.\n
+    /rt help - Print this message.\n
+    /rt reset - Reset resist counts.]])
+end
+
+function ResistTrackerAddon:HandleShowSlashCommand() ResistTrackerFrame:Show() end
+
+function ResistTrackerAddon:HandleHideSlashCommand() ResistTrackerFrame:Hide() end
 
 function ResistTrackerAddon:GetShouldPlayResistSoundEffect(info)
     return self.shouldPlayResistSoundEffect

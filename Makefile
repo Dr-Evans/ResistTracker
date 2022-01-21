@@ -1,6 +1,10 @@
 install:
-	# TODO: Add lua-format and luacheck
-	sudo apt install tidy
+	sudo apt-get update
+	sudo apt install tidy cmake
+
+	# Install luarocks before - https://github.com/luarocks/luarocks/wiki/Installation-instructions-for-Unix
+	sudo luarocks install luacheck
+	#sudo luarocks install --server=https://luarocks.org/dev luaformatter
 
 # TODO: Do recursive
 fmt:
