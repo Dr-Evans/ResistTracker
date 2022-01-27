@@ -144,6 +144,7 @@ local options = {
                 ["Interface\\AddOns\\ResistTracker\\media\\sounds\\SadTrombone.mp3"] = "Sad Trombone",
                 ["Interface\\AddOns\\ResistTracker\\media\\sounds\\LosingHorn.mp3"] = "Losing Horn",
                 ["Interface\\AddOns\\ResistTracker\\media\\sounds\\Bruh.mp3"] = "Bruh",
+                ["Interface\\AddOns\\ResistTracker\\media\\sounds\\Waow.mp3"] = "Waow",
                 ["Interface\\AddOns\\ResistTracker\\media\\sounds\\MetalGearAlert.mp3"] = "Metal Gear Alert",
                 ["Interface\\AddOns\\ResistTracker\\media\\sounds\\Sheesh.mp3"] = "Sheesh",
                 ["Interface\\AddOns\\ResistTracker\\media\\sounds\\WilhelmScream.mp3"] = "Wilhelm Scream"
