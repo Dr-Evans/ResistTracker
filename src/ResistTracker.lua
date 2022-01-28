@@ -47,6 +47,15 @@ local Event = {
 
 local CombatLogSubEvent = {SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS", SPELL_MISSED = "SPELL_MISSED"}
 
+local SlashCommandMessage = {
+    RESET = "reset",
+    CONFIG = "config",
+    SHOW = "show",
+    HIDE = "hide",
+    HELP = "help",
+    PLAY = "play"
+}
+
 local sessionAttemptCount = 0
 local sessionResistCount = 0
 local spellResistCountFontStrings = {}
