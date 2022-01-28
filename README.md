@@ -1,5 +1,5 @@
 # ResistTracker
-[![Build Status](https://github.com/Dr-Evans/ResistTracker/workflows/CI/badge.svg)](https://github.com/Dr-Evans/ResistTracker/actions?workflow=CI)
+[![Build Status](https://img.shields.io/github/workflow/status/Dr-Evans/ResistTracker/CI)](https://github.com/Dr-Evans/ResistTracker/actions?workflow=CI)
 [![Release Version](https://img.shields.io/github/v/release/Dr-Evans/ResistTracker?display_name=tag&include_prereleases)](https://github.com/Dr-Evans/ResistTracker/releases)
 
 This addon tracks resists.
