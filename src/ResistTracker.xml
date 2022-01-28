@@ -85,5 +85,6 @@
             </Frame>
         </Frames>
     </Frame>
+    <Script file="SpellEventDB.lua" />
     <Script file="ResistTracker.lua" />
 </Ui>

@@ -1,3 +1,8 @@
+local _, addonNamespace = ...
+
+local SpellEventDB = addonNamespace.SpellEventDB
+local inspect = addonNamespace.inspect
+
 local SpellID = {EntanglingRoots = 26989, Cyclone = 33786, CheapShot = 1833, KidneyShot = 8643}
 
 local MissType = {
@@ -288,6 +293,15 @@ function ResistTrackerAddon:HandleSpellCastSuccess(timestamp, subevent, hideCast
 
             SetTrackedSpellTotalCount(spellID, currentTotalCount + 1)
         end
+
+        SpellEventDB:Put({
+            ID = "spell-event-id",
+            Timestamp = timestamp,
+            InstanceID = "instance-id",
+            SpellID = spellID
+        })
+
+        print(inspect(SpellEventDB:Get("spell-event-id")))
     end
 end
 
@@ -298,14 +312,26 @@ function ResistTrackerAddon:HandleSpellMissed(timestamp, subevent, hideCaster, s
                                               amountMissed, critical)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
-    if (isMine and missType == MissType.RESIST) then
-        local currentResistCount = GetTrackedSpellResistCount(spellID)
-        if (currentResistCount) then
-            sessionResistCount = sessionResistCount + 1
+    if (isMine) then
+        SpellEventDB:Put({
+            ID = "spell-event-id",
+            Timestamp = timestamp,
+            InstanceID = "instance-id",
+            SpellID = spellID,
+            MissType = missType
+        })
 
-            SetTrackedSpellResistCount(spellID, currentResistCount + 1)
+        if missType == MissType.RESIST then
+            local currentResistCount = GetTrackedSpellResistCount(spellID)
+            if (currentResistCount) then
+                sessionResistCount = sessionResistCount + 1
 
-            if self.shouldPlayResistSoundEffect then PlaySound(self.resistSoundEffect) end
+                SetTrackedSpellResistCount(spellID, currentResistCount + 1)
+
+                if self.shouldPlayResistSoundEffect then
+                    PlaySound(self.resistSoundEffect)
+                end
+            end
         end
     end
 end
