@@ -23,7 +23,9 @@ read_globals = {
     'COMBATLOG_OBJECT_AFFILIATION_MINE',
 
     'CombatLogGetCurrentEventInfo',
-	'GetSpellInfo',
+	'GetInstanceInfo',
+    'GetSpellInfo',
+    'GetTime',
     'InterfaceOptionsFrame_OpenToCategory',
     'PlaySound',
     'PlaySoundFile',

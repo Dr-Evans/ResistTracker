@@ -1,40 +1,17 @@
 local _, addonNamespace = ...
-
---[[
--- SpellEvent --
-ID
-Timestamp
-InstanceID
-SpellID
-MissType
-
---]]
+local UUID = addonNamespace.UUID
+local Pagination = addonNamespace.Pagination
 
 ---@type table Holds all Spell Events that have occurred
 local SpellEventDB = {
-    ByID = {}, -- string to obj table
-    ByInstanceID = {}, -- string to array table
-    ByTimestamp = {} -- array
+    ByGUID = {}, -- string to SpellEvents
+    ByInstanceGUID = {}, -- string to array of SpellEvents
+    BySessionGUID = {}, -- string to array of SpellEvents
+    ByTimestamp = {} -- array of SpellEvents
 }
 
 local Sort = {TIMESTAMP = "TIMESTAMP"}
-
 local Direction = {ASC = "ASC", DESC = "DESC"}
-
-local parsePaginationToken = function(paginationToken)
-    local splits = {}
-    local i = 1
-    for value in string.gmatch(paginationToken, "-") do
-        splits[i] = value
-        i = i + 1
-    end
-
-    return splits[1], splits[2], tonumber(splits[3])
-end
-
-local createPaginationToken = function(sort, direction, nextIndex)
-    return sort .. "-" .. direction .. "-" .. nextIndex
-end
 
 local iterateSpellEvents = function(spellEventsToIterateOver, limit, sort, direction,
                                     paginationToken)
@@ -44,7 +21,7 @@ local iterateSpellEvents = function(spellEventsToIterateOver, limit, sort, direc
     local startIndex
     if paginationToken ~= nil then
         local paginationTokenSort, paginationTokenDirection, paginationTokenNextIndex =
-            parsePaginationToken(paginationToken)
+            Pagination.ParsePaginationToken(paginationToken)
         if paginationTokenSort ~= sort then
             error("Pagination token is invalid with provided sort")
         end
@@ -70,27 +47,46 @@ local iterateSpellEvents = function(spellEventsToIterateOver, limit, sort, direc
 
     local newPaginationToken = nil
     if spellEventsToIterateOver[endIndex + 1] ~= nil then
-        newPaginationToken = createPaginationToken(sort, direction, endIndex + 1)
+        newPaginationToken = Pagination.CreatePaginationToken(sort, direction, endIndex + 1)
     end
 
     return spellEvents, newPaginationToken
 end
 
 ---Get
----@param id string The ID of the spell event
+---@param guid string The ID of the spell event
 ---@return table The spell event, or nil
-function SpellEventDB:Get(id) return SpellEventDB.ByID[id] end
+function SpellEventDB:Get(guid) return SpellEventDB.ByGUID[guid] end
 
-function SpellEventDB:Put(spellEvent)
-    SpellEventDB.ByID[spellEvent.ID] = spellEvent
+function SpellEventDB:Put(timestamp, instanceGUID, sessionGUID, spellID, spellName, missType)
+    local spellEvent = {
+        GUID = UUID(),
+        Timestamp = timestamp,
+        InstanceGUID = instanceGUID,
+        SessionGUID = sessionGUID,
+        SpellID = spellID,
+        SpellName = spellName,
+        MissType = missType
+    }
 
-    local spellEventsForInstanceID = SpellEventDB.ByInstanceID[spellEvent.InstanceID]
-    if spellEventsForInstanceID == nil then
+    SpellEventDB.ByGUID[spellEvent.GUID] = spellEvent
+
+    local spellEventsForInstanceGUID = SpellEventDB.ByInstanceGUID[spellEvent.InstanceGUID]
+    if spellEventsForInstanceGUID == nil then
         -- create
-        SpellEventDB.ByInstanceID[spellEvent.InstanceID] = {spellEvent}
+        SpellEventDB.ByInstanceGUID[spellEvent.InstanceGUID] = {spellEvent}
     else
         -- append
-        spellEventsForInstanceID[#spellEventsForInstanceID + 1] = spellEvent
+        spellEventsForInstanceGUID[#spellEventsForInstanceGUID + 1] = spellEvent
+    end
+
+    local spellEventsForSessionGUID = SpellEventDB.BySessionGUID[spellEvent.SessionGUID]
+    if spellEventsForSessionGUID == nil then
+        -- create
+        SpellEventDB.ByInstanceGUID[spellEvent.InstanceGUID] = {spellEvent}
+    else
+        -- append
+        spellEventsForSessionGUID[#spellEventsForSessionGUID + 1] = spellEvent
     end
 
     SpellEventDB.ByTimestamp[#SpellEventDB.ByTimestamp + 1] = spellEvent
@@ -109,10 +105,12 @@ function SpellEventDB:List(limit, sort, direction, paginationToken)
     return iterateSpellEvents(spellEventsToIterateOver, limit, sort, direction, paginationToken)
 end
 
-function SpellEventDB:ListByInstanceID(instanceID, limit, sort, direction, paginationToken)
+function SpellEventDB:Count() return #SpellEventDB.ByTimestamp end
+
+function SpellEventDB:ListByInstanceGUID(instanceGUID, limit, sort, direction, paginationToken)
     sort = sort or Sort.TIMESTAMP
 
-    local spellEventsForInstanceID = SpellEventDB.ByInstanceID[instanceID]
+    local spellEventsForInstanceID = SpellEventDB.ByInstanceGUID[instanceGUID]
     if spellEventsForInstanceID == nil then return end
 
     local spellEventsToIterateOver
@@ -123,6 +121,36 @@ function SpellEventDB:ListByInstanceID(instanceID, limit, sort, direction, pagin
     end
 
     return iterateSpellEvents(spellEventsToIterateOver, limit, sort, direction, paginationToken)
+end
+
+function SpellEventDB:CountByInstanceGUID(instanceGUID)
+    local spellEventsForInstanceID = SpellEventDB.ByInstanceGUID[instanceGUID]
+    if spellEventsForInstanceID == nil then return 0 end
+
+    return #spellEventsForInstanceID
+end
+
+function SpellEventDB:ListBySessionGUID(sessionGUID, limit, sort, direction, paginationToken)
+    sort = sort or Sort.TIMESTAMP
+
+    local spellEventsForSessionID = SpellEventDB.BySessionGUID[sessionGUID]
+    if spellEventsForSessionID == nil then return end
+
+    local spellEventsToIterateOver
+    if sort == Sort.TIMESTAMP then
+        spellEventsToIterateOver = spellEventsForSessionID
+    else
+        error("Sort " .. sort .. " is not supported")
+    end
+
+    return iterateSpellEvents(spellEventsToIterateOver, limit, sort, direction, paginationToken)
+end
+
+function SpellEventDB:CountBySessionGUID(sessionGUID)
+    local spellEventsForSessionID = SpellEventDB.BySessionGUID[sessionGUID]
+    if spellEventsForSessionID == nil then return 0 end
+
+    return #spellEventsForSessionID
 end
 
 addonNamespace.SpellEventDB = SpellEventDB

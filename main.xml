@@ -7,8 +7,10 @@
     <Include file="lib\AceConsole-3.0\AceConsole-3.0.xml"/>
     <Include file="lib\AceConfig-3.0\AceConfig-3.0.xml"/>
     <Include file="lib\AceEvent-3.0\AceEvent-3.0.xml"/>
+    
     <Include file="lib\Inspect\Inspect.xml"/>
     <Include file="lib\Moses\Moses.xml"/>
+    <Include file="lib\UUID\UUID.xml"/>
 
     <!-- Src -->
     <Include file="src\ResistTracker.xml"/>

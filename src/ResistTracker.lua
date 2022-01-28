@@ -1,7 +1,7 @@
 local _, addonNamespace = ...
-
+local UUID = addonNamespace.UUID
 local SpellEventDB = addonNamespace.SpellEventDB
-local inspect = addonNamespace.inspect
+local InstanceDB = addonNamespace.InstanceDB
 
 local SpellID = {EntanglingRoots = 26989, Cyclone = 33786, CheapShot = 1833, KidneyShot = 8643}
 
@@ -30,18 +30,22 @@ local Class = {
     PRIEST = "PRIEST"
 }
 
-local Event = {COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED"}
+-- https://wowpedia.fandom.com/wiki/API_IsInInstance
+local InstanceType = {
+    NONE = "none",
+    PVP = "pvp",
+    ARENA = "arena",
+    PARTY = "party",
+    RAID = "raid",
+    SCENARIO = "scenario"
+}
+
+local Event = {
+    ZONE_CHANGED_NEW_AREA = "ZONE_CHANGED_NEW_AREA",
+    COMBAT_LOG_EVENT_UNFILTERED = "COMBAT_LOG_EVENT_UNFILTERED"
+}
 
 local CombatLogSubEvent = {SPELL_CAST_SUCCESS = "SPELL_CAST_SUCCESS", SPELL_MISSED = "SPELL_MISSED"}
-
-local SlashCommandMessage = {
-    RESET = "reset",
-    CONFIG = "config",
-    SHOW = "show",
-    HIDE = "hide",
-    HELP = "help",
-    PLAY = "play"
-}
 
 local sessionAttemptCount = 0
 local sessionResistCount = 0
@@ -114,6 +118,7 @@ end
 
 local ResistTrackerAddon = LibStub("AceAddon-3.0"):NewAddon("ResistTracker", "AceConsole-3.0",
                                                             "AceEvent-3.0")
+
 local options = {
     type = "group",
     name = "Resist Tracker",
@@ -177,6 +182,7 @@ function ResistTrackerAddon:OnInitialize()
 
     self.shouldPlayResistSoundEffect = true
     self.resistSoundEffect = "416"
+    self.sessionGUID = UUID()
 
     local prevFontString
 
@@ -200,6 +206,7 @@ end
 
 function ResistTrackerAddon:OnEnable()
     self:RegisterEvent(Event.COMBAT_LOG_EVENT_UNFILTERED, "HandleCombatLogEventUnfiltered")
+    self:RegisterEvent(Event.ZONE_CHANGED_NEW_AREA, "HandleZoneChangedNewArea")
 end
 
 function ResistTrackerAddon:SlashCommand(msg)
@@ -286,7 +293,7 @@ function ResistTrackerAddon:HandleSpellCastSuccess(timestamp, subevent, hideCast
                                                    spellID, spellName, spellSchool)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
-    if (isMine) then
+    if (isMine and self.currentArena ~= nil) then
         local currentTotalCount = GetTrackedSpellTotalCount(spellID)
         if (currentTotalCount) then
             sessionAttemptCount = sessionAttemptCount + 1
@@ -294,14 +301,8 @@ function ResistTrackerAddon:HandleSpellCastSuccess(timestamp, subevent, hideCast
             SetTrackedSpellTotalCount(spellID, currentTotalCount + 1)
         end
 
-        SpellEventDB:Put({
-            ID = "spell-event-id",
-            Timestamp = timestamp,
-            InstanceID = "instance-id",
-            SpellID = spellID
-        })
-
-        print(inspect(SpellEventDB:Get("spell-event-id")))
+        SpellEventDB:Put(timestamp, self.currentArena.InstanceGUID, self.sessionGUID, spellID,
+                         spellName, nil)
     end
 end
 
@@ -312,27 +313,28 @@ function ResistTrackerAddon:HandleSpellMissed(timestamp, subevent, hideCaster, s
                                               amountMissed, critical)
     local isMine = bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
 
-    if (isMine) then
-        SpellEventDB:Put({
-            ID = "spell-event-id",
-            Timestamp = timestamp,
-            InstanceID = "instance-id",
-            SpellID = spellID,
-            MissType = missType
-        })
+    if (isMine and self.currentArena ~= nil and missType == MissType.RESIST) then
+        local currentResistCount = GetTrackedSpellResistCount(spellID)
+        if (currentResistCount) then
+            sessionResistCount = sessionResistCount + 1
 
-        if missType == MissType.RESIST then
-            local currentResistCount = GetTrackedSpellResistCount(spellID)
-            if (currentResistCount) then
-                sessionResistCount = sessionResistCount + 1
-
-                SetTrackedSpellResistCount(spellID, currentResistCount + 1)
-
-                if self.shouldPlayResistSoundEffect then
-                    PlaySound(self.resistSoundEffect)
-                end
-            end
+            SetTrackedSpellResistCount(spellID, currentResistCount + 1)
         end
+
+        SpellEventDB:Put(timestamp, self.currentArena.InstanceGUID, self.sessionGUID, spellID,
+                         spellName, missType)
+    end
+end
+
+function ResistTrackerAddon:HandleZoneChangedNewArea()
+    local instanceName, instanceType, _, _, maxPlayers, _, _, instanceID = GetInstanceInfo()
+
+    if (instanceType == InstanceType.ARENA) then
+        local instance = InstanceDB:Put(instanceName, instanceID, instanceType, maxPlayers)
+
+        self.currentArena = instance
+    elseif (self.currentArena ~= nil) then
+        self.currentArena = nil
     end
 end
 
