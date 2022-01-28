@@ -110,12 +110,12 @@ function SpellEventDB:Count() return #SpellEventDB.ByTimestamp end
 function SpellEventDB:ListByInstanceGUID(instanceGUID, limit, sort, direction, paginationToken)
     sort = sort or Sort.TIMESTAMP
 
-    local spellEventsForInstanceID = SpellEventDB.ByInstanceGUID[instanceGUID]
-    if spellEventsForInstanceID == nil then return end
+    local spellEventsForInstanceGUID = SpellEventDB.ByInstanceGUID[instanceGUID]
+    if spellEventsForInstanceGUID == nil then return end
 
     local spellEventsToIterateOver
     if sort == Sort.TIMESTAMP then
-        spellEventsToIterateOver = spellEventsForInstanceID
+        spellEventsToIterateOver = spellEventsForInstanceGUID
     else
         error("Sort " .. sort .. " is not supported")
     end
@@ -124,21 +124,21 @@ function SpellEventDB:ListByInstanceGUID(instanceGUID, limit, sort, direction, p
 end
 
 function SpellEventDB:CountByInstanceGUID(instanceGUID)
-    local spellEventsForInstanceID = SpellEventDB.ByInstanceGUID[instanceGUID]
-    if spellEventsForInstanceID == nil then return 0 end
+    local spellEventsForInstanceGUID = SpellEventDB.ByInstanceGUID[instanceGUID]
+    if spellEventsForInstanceGUID == nil then return 0 end
 
-    return #spellEventsForInstanceID
+    return #spellEventsForInstanceGUID
 end
 
 function SpellEventDB:ListBySessionGUID(sessionGUID, limit, sort, direction, paginationToken)
     sort = sort or Sort.TIMESTAMP
 
-    local spellEventsForSessionID = SpellEventDB.BySessionGUID[sessionGUID]
-    if spellEventsForSessionID == nil then return end
+    local spellEventsForSessionGUID = SpellEventDB.BySessionGUID[sessionGUID]
+    if spellEventsForSessionGUID == nil then return end
 
     local spellEventsToIterateOver
     if sort == Sort.TIMESTAMP then
-        spellEventsToIterateOver = spellEventsForSessionID
+        spellEventsToIterateOver = spellEventsForSessionGUID
     else
         error("Sort " .. sort .. " is not supported")
     end
@@ -147,10 +147,10 @@ function SpellEventDB:ListBySessionGUID(sessionGUID, limit, sort, direction, pag
 end
 
 function SpellEventDB:CountBySessionGUID(sessionGUID)
-    local spellEventsForSessionID = SpellEventDB.BySessionGUID[sessionGUID]
-    if spellEventsForSessionID == nil then return 0 end
+    local spellEventsForSessionGUID = SpellEventDB.BySessionGUID[sessionGUID]
+    if spellEventsForSessionGUID == nil then return 0 end
 
-    return #spellEventsForSessionID
+    return #spellEventsForSessionGUID
 end
 
 addonNamespace.SpellEventDB = SpellEventDB
