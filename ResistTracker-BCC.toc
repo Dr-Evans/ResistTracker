@@ -1,6 +1,6 @@
 ## Interface: 20503
 ## Title: Resist Tracker
 ## Notes: A simple resist tracker.
-## Version: 0.2.1-alpha
+## Version: v0.2.5-alpha
 
 main.xml
